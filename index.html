@@ -558,214 +558,338 @@ nav {
 }
 
 /* ═══════════════════════════════════════
-   CAROUSEL
+   EPISODES TIMELINE — vertical chronicle
 ═══════════════════════════════════════ */
-#carousel-section {
+#episodes-section {
   position: relative;
   z-index: 2;
   padding: 0 0 var(--section-pad);
 }
+.eps-header {
+  padding-bottom: clamp(1.5rem, 4vw, 3rem);
+}
+.eps-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .8rem;
+  margin-top: .6rem;
+}
+.eps-count-line {
+  font-family: 'Orbitron', sans-serif;
+  font-size: .55rem;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,.3);
+}
+.eps-count-line span { color: var(--cyan); }
 
-.carousel-header {
-  padding: 0 var(--page-pad) clamp(1rem,3vw,2rem);
+/* ── SORT BUTTON ──────────────────────── */
+.tl-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(8,13,20,.9);
+  border: 1px solid rgba(0,245,255,.3);
+  color: var(--cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-size: .48rem;
+  letter-spacing: 2px;
+  padding: .45rem 1rem;
+  cursor: pointer;
+  clip-path: polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);
+  transition: background .2s, border-color .2s, box-shadow .2s;
+  backdrop-filter: blur(8px);
+}
+.tl-sort-btn:hover {
+  background: rgba(0,245,255,.08);
+  border-color: var(--cyan);
+  box-shadow: 0 0 18px rgba(0,245,255,.25);
+}
+.tl-sort-btn i { font-size: .65rem; transition: transform .35s cubic-bezier(.23,1,.32,1); }
+.tl-sort-btn.desc i { transform: rotate(180deg); }
+
+/* ── TIMELINE WRAP ────────────────────── */
+.tl-wrap {
+  position: relative;
+  padding: 2rem 0 3rem;
 }
 
-.carousel-wrapper {
+/* línea vertical central */
+.tl-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--cyan) 8%,
+    rgba(0,245,255,.35) 50%,
+    var(--purple) 92%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px rgba(0,245,255,.3);
+  z-index: 0;
+}
+@media (max-width: 700px) {
+  .tl-line { left: 22px; transform: none; }
+}
+
+/* ── FEED CONTAINER ───────────────────── */
+.tl-feed {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 5vw, 3.5rem);
+}
+
+/* ── TIMELINE ITEM ────────────────────── */
+.tl-item {
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  align-items: flex-start;
+  gap: 0;
   position: relative;
 }
 
-/* fade edges */
-.carousel-wrapper::before,
-.carousel-wrapper::after {
+/* La columna central (nodo) se estira a la altura del item */
+.tl-item:nth-child(odd)  .tl-card { grid-column: 1; justify-self: end; }
+.tl-item:nth-child(odd)  .tl-node { grid-column: 2; grid-row: 1; }
+.tl-item:nth-child(odd)  .tl-void { grid-column: 3; grid-row: 1; }
+
+.tl-item:nth-child(even) .tl-void { grid-column: 1; grid-row: 1; }
+.tl-item:nth-child(even) .tl-node { grid-column: 2; grid-row: 1; }
+.tl-item:nth-child(even) .tl-card { grid-column: 3; justify-self: start; }
+
+/* ── CONNECTOR LINE ───────────────────── */
+/* Línea horizontal que conecta nodo con tarjeta.
+   top: 28.125% = mitad de la miniatura (aspect 16/9 → altura = 56.25% del ancho,
+   la mitad = 28.125%). Funciona en cualquier ancho porque es % del card. */
+.tl-card {
+  position: relative;
+}
+.tl-item:nth-child(odd)  .tl-card::after,
+.tl-item:nth-child(even) .tl-card::before {
   content: '';
   position: absolute;
-  top: 0; bottom: 28px; /* stop above dots area */
-  width: clamp(20px, 4vw, 50px);
+  top: 28.125%;   /* mitad exacta de la miniatura 16:9 */
+  height: 1px;
+  width: 28px;
+  background: linear-gradient(to right, rgba(0,245,255,.45), transparent);
   pointer-events: none;
-  z-index: 3;
 }
-.carousel-wrapper::before {
-  left: 0;
-  background: linear-gradient(to right, var(--dark), transparent);
-}
-.carousel-wrapper::after {
-  right: 0;
-  background: linear-gradient(to left, var(--dark), transparent);
+.tl-item:nth-child(odd)  .tl-card::after  { right: -28px; }
+.tl-item:nth-child(even) .tl-card::before { left: -28px; background: linear-gradient(to left, rgba(0,245,255,.45), transparent); }
+
+/* ── MOBILE ───────────────────────────── */
+@media (max-width: 700px) {
+  .tl-item {
+    grid-template-columns: 44px 1fr;
+  }
+  .tl-item:nth-child(odd)  .tl-card,
+  .tl-item:nth-child(even) .tl-card { grid-column: 2; grid-row: 1; justify-self: stretch; }
+  .tl-item:nth-child(odd)  .tl-node,
+  .tl-item:nth-child(even) .tl-node { grid-column: 1; grid-row: 1; }
+  .tl-void { display: none !important; }
+  .tl-item:nth-child(odd)  .tl-card::after,
+  .tl-item:nth-child(even) .tl-card::before { display: none; }
 }
 
-/* scrollable track */
-.carousel-track {
+/* ── NODE ─────────────────────────────── */
+/* El nodo se centra en la mitad de la miniatura.
+   Thumb height = card_width * 9/16.
+   Usamos padding-top en % relativo al ancho del nodo (columna 56px)
+   → no funciona. Mejor: position absolute dentro del item. */
+.tl-node {
+  position: relative;
   display: flex;
-  gap: clamp(.6rem, 1.5vw, 1.25rem);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  /* horizontal padding so first/last card is flush */
-  padding: .5rem var(--page-pad) 1rem;
-  cursor: grab;
-  /* critical: smooth momentum on iOS */
-  will-change: scroll-position;
+  align-items: flex-start;
+  justify-content: center;
+  /* El dot se posiciona absolute al 28.125% del card width — imposible en CSS
+     puro cross-column. Solución: el nodo tiene height igual al card y
+     centra el dot usando flex + margin-top calculado en la columna de 56px.
+     Como la columna de 56px no conoce el ancho del card, usamos otra estrategia:
+     el nodo stretcha toda la altura y centra absolutamente dentro del thumb. */
+  align-self: stretch;   /* ocupa toda la altura del grid row */
+  z-index: 2;
 }
-.carousel-track:active { cursor: grabbing; }
-.carousel-track::-webkit-scrollbar { display: none; }
+.tl-node-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid;
+  position: absolute;
+  /* top = mitad de la miniatura = 56.25% de la anchura del card.
+     Como no podemos referenciar el card desde aquí en CSS puro,
+     usamos top: 28.125% relativo al HEIGHT del .tl-node (que = altura del card).
+     Esto NO es correcto — usamos JS solo para este cálculo puntual. */
+  top: 0;   /* JS override via --node-top */
+  left: 50%; transform: translateX(-50%);
+  transition: transform .3s;
+}
+.tl-item:hover .tl-node-dot { transform: translateX(-50%) scale(1.2); }
 
-/*
- * ─── CARD SIZING ───────────────────────────────────
- * Cards fill 1/N of the visible track width.
- * Gap is subtracted so they line up perfectly.
- * --carousel-cols is set via inline style on the wrapper
- * for each breakpoint (set in JS for precision).
- * ───────────────────────────────────────────────────
- */
-.ep-card {
-  /* Each card: (100% of track - gaps) / N cols  */
-  flex: 0 0 var(--card-w, 80vw);
-  width: var(--card-w, 80vw);
-  min-width: 0; /* prevent flex blowout */
-  background: rgba(255,255,255,.03);
+/* CIAN: sin muertes */
+.tl-node-dot.node-safe {
+  border-color: var(--cyan);
+  background: rgba(0,245,255,.1);
+  box-shadow: 0 0 14px rgba(0,245,255,.6), 0 0 28px rgba(0,245,255,.2);
+}
+/* pulse ring on safe */
+.tl-node-dot.node-safe::after {
+  content: '';
+  position: absolute;
+  inset: -5px; border-radius: 50%;
+  border: 1px solid var(--cyan);
+  opacity: 0;
+  animation: node-ring 2.8s ease-out infinite;
+}
+@keyframes node-ring {
+  0%   { transform: scale(1);   opacity: .7; }
+  100% { transform: scale(1.7); opacity: 0;  }
+}
+
+/* ROJO: hay muertes — parpadeo */
+.tl-node-dot.node-dead {
+  border-color: var(--red);
+  background: rgba(255,0,51,.12);
+  box-shadow: 0 0 14px rgba(255,0,51,.7), 0 0 28px rgba(255,0,51,.3);
+  animation: node-pulse 1.4s ease-in-out infinite;
+}
+.tl-node-dot.node-dead i {
+  font-size: .6rem; color: var(--red);
+  filter: drop-shadow(0 0 4px var(--red));
+}
+@keyframes node-pulse {
+  0%,100% { box-shadow: 0 0 10px rgba(255,0,51,.6), 0 0 22px rgba(255,0,51,.2); opacity: 1; }
+  50%      { box-shadow: 0 0 24px rgba(255,0,51,.9), 0 0 50px rgba(255,0,51,.5); opacity: .75; }
+}
+
+/* ── CARD ─────────────────────────────── */
+.tl-card {
+  position: relative;
+  background: rgba(8,13,20,.85);
   border: 1px solid rgba(255,255,255,.07);
   overflow: hidden;
   cursor: pointer;
-  transition: transform .4s cubic-bezier(.23,1,.32,1), border-color .3s, box-shadow .3s;
-  position: relative;
-  clip-path: polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
-  scroll-snap-align: start;
-  /* ensure taps register on mobile */
-  touch-action: pan-y;
-  -webkit-tap-highlight-color: rgba(0,245,255,0.08);
+  clip-path: polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+  transition: transform .35s cubic-bezier(.23,1,.32,1),
+              border-color .3s, box-shadow .3s;
+  width: 100%;
+  max-width: 420px;
+  backdrop-filter: blur(6px);
 }
-.ep-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  border-color: var(--cyan);
-  box-shadow: 0 14px 45px rgba(0,0,0,.5), 0 0 22px rgba(0,245,255,.12);
+.tl-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  border-color: rgba(0,245,255,.35);
+  box-shadow: 0 16px 48px rgba(0,0,0,.6), 0 0 24px rgba(0,245,255,.1);
 }
-.ep-thumb {
-  width: 100%; aspect-ratio: 16/9;
-  background: #0d1520;
+/* dead card gets red tint on hover */
+.tl-card.card-dead:hover {
+  border-color: rgba(255,0,51,.4);
+  box-shadow: 0 16px 48px rgba(0,0,0,.6), 0 0 24px rgba(255,0,51,.12);
+}
+
+/* thumbnail */
+.tl-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
   position: relative;
   overflow: hidden;
+  background: #0a0f1a;
 }
-.ep-thumb-bg {
-  position: absolute; inset: 0;
-  transition: transform .5s;
-}
-.ep-card:hover .ep-thumb-bg { transform: scale(1.07); }
-.ep-thumb-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(155,0,255,.35) 0%, rgba(255,0,51,.25) 100%);
-}
-.ep-thumb-inner {
-  position: relative;
+.tl-thumb img {
   width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  object-fit: cover;
+  display: block;
+  transition: transform .5s, filter .4s;
+  filter: brightness(.85) saturate(.9);
 }
-.ep-play-btn {
+.tl-card:hover .tl-thumb img {
+  transform: scale(1.06);
+  filter: brightness(.6) saturate(1.15);
+}
+.tl-thumb-overlay {
   position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(8,13,20,.8) 0%, transparent 55%);
+}
+/* play button on hover */
+.tl-thumb-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .3s;
+}
+.tl-card:hover .tl-thumb-play { opacity: 1; }
+.tl-thumb-play-circle {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: rgba(255,0,51,.88);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 0 28px rgba(255,0,51,.7);
+  transform: scale(.85);
+  transition: transform .3s cubic-bezier(.23,1,.32,1);
+}
+.tl-card:hover .tl-thumb-play-circle { transform: scale(1); }
+
+/* body */
+.tl-body {
+  padding: .7rem .85rem .8rem;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  opacity: 0;
-  transition: opacity .3s;
-  background: rgba(0,0,0,.22);
+  flex-direction: column;
+  gap: .4rem;
 }
-.ep-card:hover .ep-play-btn { opacity: 1; }
-.ep-num-badge {
-  position: absolute; top: 8px; left: 8px;
+.tl-ep-num {
   font-family: 'Orbitron', sans-serif;
-  font-size: .5rem;
-  letter-spacing: 2px;
-  padding: 3px 7px;
-  background: rgba(2,4,8,.88);
-  border: 1px solid var(--cyan);
+  font-size: .44rem; letter-spacing: 3px;
   color: var(--cyan);
-  backdrop-filter: blur(8px);
 }
-.ep-body { padding: clamp(.6rem, 2vw, 1rem); }
-.ep-card-title {
+.tl-card.card-dead .tl-ep-num { color: var(--red); }
+.tl-title {
   font-family: 'Anton', sans-serif;
-  font-size: clamp(.8rem, 2vw, 1rem);
-  letter-spacing: 1px;
-  margin-bottom: .55rem;
-  line-height: 1.2;
+  font-size: clamp(.75rem, 1.8vw, .95rem);
+  letter-spacing: .5px; line-height: 1.2;
 }
-.ep-meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .3rem;
+.tl-meta {
+  display: flex; align-items: center;
+  gap: 1rem; margin-top: .1rem;
 }
-.ep-meta-item {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(.52rem, 1.2vw, .6rem);
-  color: rgba(255,255,255,.42);
-}
-.ep-meta-item span { color: rgba(255,255,255,.9); display: block; }
-.ep-meta-item.deaths span { color: var(--red); text-shadow: 0 0 8px var(--red); }
-.ep-meta-item.boss span { color: var(--purple); }
-.ep-duration {
-  position: absolute; bottom: 7px; right: 7px;
+.tl-deaths {
   font-family: 'Orbitron', sans-serif;
-  font-size: .48rem;
-  padding: 2px 5px;
-  background: rgba(0,0,0,.78);
+  font-size: .44rem; letter-spacing: 1px;
+  color: rgba(255,255,255,.35);
+  display: flex; align-items: center; gap: .3rem;
+}
+.tl-deaths.has-deaths {
+  color: var(--red);
+  text-shadow: 0 0 8px rgba(255,0,51,.6);
+}
+.tl-deaths i { font-size: .5rem; }
+.tl-dur {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: .48rem; color: rgba(255,255,255,.38);
+  display: flex; align-items: center; gap: .3rem;
 }
 
-/* nav arrows */
-.carousel-btn {
-  position: absolute;
-  top: calc(50% - 14px); /* visually center on thumb area */
-  transform: translateY(-50%);
-  z-index: 4;
-  width: 44px; height: 44px;
-  background: rgba(2,4,8,.88);
-  border: 1px solid rgba(0,245,255,.4);
-  color: var(--cyan);
-  font-size: 1.4rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .25s;
-  backdrop-filter: blur(10px);
-  clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+/* scan line on hover */
+.tl-card::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px
+  );
+  opacity: 0; transition: opacity .35s;
 }
-.carousel-btn:hover  { background: rgba(0,245,255,.14); box-shadow: var(--glow-cyan); }
-.carousel-btn:active { background: rgba(0,245,255,.25); }
-.carousel-btn.prev { left: 4px; }
-.carousel-btn.next { right: 4px; }
-.carousel-btn:disabled { opacity: .25; pointer-events: none; }
+.tl-card:hover::before { opacity: 1; }
 
-/* dots */
-.carousel-dots {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  margin-top: .9rem;
-  flex-wrap: wrap;
-  padding: 0 var(--page-pad);
-}
-.carousel-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.18);
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: all .3s;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-.carousel-dot.active {
-  background: var(--cyan);
-  box-shadow: 0 0 10px var(--cyan);
-  width: 22px;
-  border-radius: 3.5px;
+/* ── EMPTY STATE ──────────────────────── */
+.eps-empty {
+  font-family: 'Orbitron', sans-serif;
+  font-size: .6rem; letter-spacing: 4px;
+  color: rgba(255,255,255,.2);
+  text-align: center; padding: 4rem 0;
 }
 
 /* ═══════════════════════════════════════
@@ -1196,12 +1320,201 @@ footer {
 /* Ensure no horizontal overflow anywhere */
 section, footer, nav { max-width: 100vw; }
 
+/* ═══════════════════════════════════════
+   STICKY TRAILER BUTTON
+═══════════════════════════════════════ */
+#trailer-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 5000;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: var(--glow-red), 0 8px 32px rgba(0,0,0,0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .3s cubic-bezier(.23,1,.32,1), box-shadow .3s;
+  animation: trailer-btn-in .6s 1.2s cubic-bezier(.23,1,.32,1) both;
+}
+@keyframes trailer-btn-in {
+  from { transform: scale(0) rotate(-180deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);    opacity: 1; }
+}
+#trailer-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 40px #ff0033, 0 0 80px #ff003360, 0 12px 40px rgba(0,0,0,.7);
+}
+#trailer-btn:active { transform: scale(.96); }
+
+#trailer-btn::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  opacity: 0;
+  animation: trailer-pulse 2.5s ease-out infinite;
+}
+#trailer-btn::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid var(--red);
+  opacity: 0;
+  animation: trailer-pulse 2.5s .6s ease-out infinite;
+}
+@keyframes trailer-pulse {
+  0%   { transform: scale(1);    opacity: .7; }
+  100% { transform: scale(1.55); opacity: 0;  }
+}
+#trailer-btn i {
+  font-size: 1.5rem;
+  color: #fff;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.6));
+  position: relative;
+  z-index: 1;
+  margin-left: 3px;
+}
+#trailer-btn .trailer-tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: rgba(2,4,8,.92);
+  border: 1px solid rgba(255,0,51,.4);
+  color: var(--white);
+  font-family: 'Orbitron', sans-serif;
+  font-size: .55rem;
+  letter-spacing: 2px;
+  padding: .45rem .85rem;
+  clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+#trailer-btn:hover .trailer-tooltip { opacity: 1; }
+
+#trailer-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+#trailer-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.trailer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2,4,8,.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.trailer-panel {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  transform: scale(.88) translateY(30px);
+  transition: transform .4s cubic-bezier(.23,1,.32,1);
+}
+#trailer-modal.open .trailer-panel {
+  transform: scale(1) translateY(0);
+}
+.trailer-panel::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, var(--cyan), var(--purple), var(--red), var(--cyan));
+  background-size: 400% 400%;
+  z-index: -1;
+  animation: border-flow 4s linear infinite;
+  border-radius: 2px;
+}
+.trailer-video-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+.trailer-video-wrap iframe {
+  width: 100%; height: 100%;
+  border: none;
+  display: block;
+}
+.trailer-close {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--dark2);
+  border: 1px solid rgba(255,255,255,.15);
+  color: var(--white);
+  font-size: .9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, transform .2s;
+  z-index: 2;
+}
+.trailer-close:hover {
+  background: var(--red);
+  transform: rotate(90deg);
+}
+.trailer-close i { pointer-events: none; }
+
+@media (max-width: 480px) {
+  #trailer-btn { width: 52px; height: 52px; bottom: 1.25rem; right: 1.25rem; }
+  #trailer-btn i { font-size: 1.2rem; }
+}
+
 </style>
 </head>
 <body>
 
 <canvas id="particles-canvas"></canvas>
 <div class="noise"></div>
+
+<!-- ═══ STICKY TRAILER BUTTON ═══ -->
+<button id="trailer-btn" aria-label="Ver Trailer">
+  <i class="fa-solid fa-play"></i>
+  <span class="trailer-tooltip">VER TRAILER</span>
+</button>
+
+<!-- ═══ TRAILER MODAL ═══ -->
+<div id="trailer-modal" role="dialog" aria-modal="true" aria-label="Trailer INSANELOCKE">
+  <div class="trailer-backdrop" id="trailerBackdrop"></div>
+  <div class="trailer-panel">
+    <button class="trailer-close" id="trailerClose" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+    <div class="trailer-video-wrap">
+      <iframe id="trailerIframe"
+        src=""
+        data-src="https://www.youtube.com/embed/cT12CuoTWQo?autoplay=1&rel=0"
+        title="INSANELOCKE — Trailer Oficial"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ NAVBAR ═══ -->
 <nav>
@@ -1227,7 +1540,7 @@ section, footer, nav { max-width: 100vw; }
   <a href="#featured">Último Episodio</a>
   <a href="#lives-section">Vidas</a>
   <a href="#rules">Reglas</a>
-  <a href="platino.html">Platino</a>
+  <a href="platino.html">Platino</a> 
   <a href="https://www.youtube.com/channel/UCo6ypuutg-DhPT6CvkTjJ7g" target="_blank" rel="noopener">YouTube ↗</a>
 </nav>
 
@@ -1277,30 +1590,34 @@ section, footer, nav { max-width: 100vw; }
       <div class="video-overlay"></div>
       <div class="video-info">
         <div class="ep-badge">EP 00 · TRAILER</div>
-        <div class="ep-title">¡EL CAOS ABSOLUTO! 🎲 Tráiler POKÉMON ZAFIRO ALPHA Insanelocke
-</div>
+        <div class="ep-title">¡EL CAOS ABSOLUTO HA LLEGADO! 🎲 | Pokémon Insanelocke (Tráiler)</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ EPISODES CAROUSEL ═══  
-<section id="carousel-section">
-  <div class="carousel-header">
+<!-- ═══ EPISODES TIMELINE ═══ -->
+<section id="episodes-section">
+  <div class="eps-header constrained">
     <div class="section-label reveal">TODOS LOS EPISODIOS</div>
     <h2 class="section-title reveal">ARCHIVO <span style="color:var(--purple)">COMPLETO</span></h2>
+    <div class="eps-header-row reveal">
+      <div class="eps-count-line"><span id="epsTotal">0</span> EPISODIOS DISPONIBLES</div>
+      <button class="tl-sort-btn" id="tlSortBtn" aria-label="Cambiar orden">
+        <i class="fa-solid fa-arrow-down-1-9" id="tlSortIcon"></i>
+        <span id="tlSortLabel">MÁS RECIENTE</span>
+      </button>
+    </div>
   </div>
 
-  <div class="carousel-wrapper">
-    <button class="carousel-btn prev" id="carouselPrev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
-    <div class="carousel-track" id="carouselTrack"></div>
-    <button class="carousel-btn next" id="carouselNext" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+  <!-- Timeline crónica -->
+  <div class="tl-wrap constrained">
+    <div class="tl-line"></div>
+    <div class="tl-feed" id="tlFeed"></div>
   </div>
 
-  <div class="carousel-dots" id="carouselDots"></div>
+  <div class="eps-empty" id="epsEmpty" style="display:none">PRÓXIMAMENTE</div>
 </section>
-
--->
 
 <!-- ═══ BADGES / MEDALLAS ═══ -->
 <section id="badges-section">
@@ -1555,24 +1872,17 @@ section, footer, nav { max-width: 100vw; }
 
 <script>
 /* ══════════════════════════════════════════════════════
-   EPISODES DATA
+   EPISODES — cargados desde videos.json
    ══════════════════════════════════════════════════════
-   Para añadir un nuevo episodio, agrega un objeto al
-   array siguiendo la misma estructura.
-  const EPISODES = [
-  { ep:'01', title:'El Comienzo del Fin',   deaths:1, boss:'Hydra Rex',     duration:'38:22', fa:'fa-dragon',               color:'#9b00ff', ytId:'dQw4w9WgXcQ' },
-  { ep:'02', title:'Traici\u00f3n en el Vac\u00edo', deaths:0, boss:'Shadow Lord',  duration:'42:10', fa:'fa-user-secret',           color:'#ff0033', ytId:'dQw4w9WgXcQ' },
-  { ep:'03', title:'Ca\u00edda Libre',           deaths:2, boss:'Storm Giant',   duration:'55:44', fa:'fa-bolt',                  color:'#00f5ff', ytId:'dQw4w9WgXcQ' },
-  { ep:'04', title:'El Mapa Roto',          deaths:1, boss:'Glitch Entity', duration:'29:07', fa:'fa-map-location-dot',      color:'#9b00ff', ytId:'dQw4w9WgXcQ' },
-  { ep:'05', title:'Infierno Aleatorio',    deaths:1, boss:'Chaos Daemon',  duration:'61:33', fa:'fa-fire-flame-curved',     color:'#ff0033', ytId:'dQw4w9WgXcQ' },
-  { ep:'06', title:'Modo Espejo',           deaths:0, boss:'Mirror Boss',   duration:'44:55', fa:'fa-circle-half-stroke',    color:'#00f5ff', ytId:'dQw4w9WgXcQ' },
-  { ep:'07', title:'Bomba de Tiempo',       deaths:2, boss:'Tempus Rex',    duration:'37:18', fa:'fa-bomb',                  color:'#ff0033', ytId:'dQw4w9WgXcQ' },
-  { ep:'08', title:'La \u00daltima Oportunidad', deaths:3, boss:'???',      duration:'72:01', fa:'fa-triangle-exclamation',  color:'#9b00ff', ytId:'dQw4w9WgXcQ' },
-];
-   ══════════════════════════════════════════════════════ */
-const EPISODES = [
- 
-];
+   Estructura de cada objeto en videos.json:
+   {
+     "ep":       "01",
+     "title":    "El Comienzo del Fin",
+     "deaths":   1,
+     "duration": "38:22",
+     "ytId":     "ID_DEL_VIDEO_YOUTUBE"
+   }
+══════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════
    PARTICLES
@@ -1727,206 +2037,134 @@ for (let i = 1; i <= 20; i++) {
 }
 
 /* ══════════════════════════════════════════════════════
-   EPISODES CAROUSEL
-   ──────────────────────────────────────────────────────
-   Card width is computed in JS so it exactly fills
-   1/N of the visible track, accounting for padding+gaps.
-   Breakpoints:
-     ≥ 900px  → 3 visible cards
-     540–899px → 2 visible cards
-     < 540px  → 1 visible card (full width)
-	 
-	 DESCOMENTAR ESTO CUANDO SALGA EL EP1
-══════════════════════════════════════════════════════ 
-const track   = document.getElementById('carouselTrack');
-const dotsEl  = document.getElementById('carouselDots');
-const btnPrev = document.getElementById('carouselPrev');
-const btnNext = document.getElementById('carouselNext');
+   EPISODES TIMELINE — datos desde videos.json
+══════════════════════════════════════════════════════ */
+(async function initEpisodesGrid() {
+  const feed    = document.getElementById('tlFeed');
+  const empty   = document.getElementById('epsEmpty');
+  const totalEl = document.getElementById('epsTotal');
+  const sortBtn  = document.getElementById('tlSortBtn');
+  const sortIcon = document.getElementById('tlSortIcon');
+  const sortLabel= document.getElementById('tlSortLabel');
 
+  const FALLBACK = window.__VIDEOS_JSON__ || [
+    { ep:'00', title:'¡El Caos Absoluto Ha Llegado!', deaths:0, duration:'02:15', ytId:'cT12CuoTWQo' }
+  ];
 
+  let EPS = [];
+  try {
+    const res = await fetch('videos.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    EPS = await res.json();
+  } catch (_) { EPS = FALLBACK; }
 
-// ── Build cards ──────────────────────────────────────
-EPISODES.forEach((ep, idx) => {
-  const card = document.createElement('div');
-  card.className = 'ep-card';
-  card.setAttribute('data-idx', idx);
+  if (!EPS.length) { empty.style.display = 'block'; return; }
 
-  // Build icon element safely in JS (avoids quote conflicts in HTML strings)
-  const iconEl = document.createElement('i');
-  iconEl.className = 'fa-solid ' + ep.fa;
+  totalEl.textContent = EPS.length;
 
-  card.innerHTML = `
-    <div class="ep-thumb">
-      <div class="ep-thumb-bg" style="background:radial-gradient(ellipse at 30% 40%,${ep.color}55 0%,#080d14 70%);"></div>
-      <div class="ep-thumb-overlay"></div>
-      <div class="ep-thumb-inner ep-thumb-icon"></div>
-      <div class="ep-play-btn"><i class="fa-solid fa-play"></i></div>
-      <div class="ep-num-badge">EP ${ep.ep}</div>
-    </div>
-    <div class="ep-body">
-      <div class="ep-card-title">${ep.title}</div>
-      <div class="ep-meta">
-        <div class="ep-meta-item deaths"><span><i class="fa-solid fa-skull ep-deaths-icon"></i> ${ep.deaths}</span>MUERTES</div>
-        <div class="ep-meta-item boss"><span>${ep.boss}</span>BOSS</div>
+  const openYT = (ytId) => window.open('https://www.youtube.com/watch?v=' + ytId, '_blank', 'noopener');
+
+  // ── Sort state: true = reciente primero (desc), false = antiguo primero (asc)
+  let descending = true;
+
+  // ── Build a single timeline item ─────────────────
+  function buildItem(ep) {
+    const dead = ep.deaths > 0;
+    const item = document.createElement('div');
+    item.className = 'tl-item';
+    item.innerHTML = `
+      <div class="tl-void"></div>
+      <div class="tl-node">
+        <div class="tl-node-dot ${dead ? 'node-dead' : 'node-safe'}">
+          ${dead ? '<i class="fa-solid fa-skull"></i>' : ''}
+        </div>
       </div>
-    </div>
-    <div class="ep-duration"><i class="fa-regular fa-clock" style="margin-right:.3rem;opacity:.6;"></i>${ep.duration}</div>
-  `;
-
-  // Append icon safely after innerHTML is set
-  card.querySelector('.ep-thumb-icon').appendChild(iconEl);
-
-  card.addEventListener('click', () => {
-    window.open('https://www.youtube.com/watch?v=' + ep.ytId, '_blank', 'noopener');
-  });
-  track.appendChild(card);
-});
-
-// ── Build dots ───────────────────────────────────────
-EPISODES.forEach((_, idx) => {
-  const dot = document.createElement('button');
-  dot.className = 'carousel-dot' + (idx === 0 ? ' active' : '');
-  dot.setAttribute('aria-label', `Episodio ${idx + 1}`);
-  dot.addEventListener('click', () => scrollToCard(idx));
-  dotsEl.appendChild(dot);
-});
-
-// ── Card sizing ──────────────────────────────────────
-function getColumns() {
-  const w = window.innerWidth;
-  if (w >= 900) return 3;
-  if (w >= 540) return 2;
-  return 1;
-}
-
-function getGap() {
-  // matches clamp(.6rem,1.5vw,1.25rem) — read actual computed value
-  const trackStyle = getComputedStyle(track);
-  return parseFloat(trackStyle.columnGap || trackStyle.gap) || 12;
-}
-
-function getTrackPad() {
-  // left padding of the track (--page-pad)
-  return parseFloat(getComputedStyle(track).paddingLeft) || 16;
-}
-
-function setCardWidths() {
-  const cols    = getColumns();
-  const gap     = getGap();
-  const pad     = getTrackPad();
-  const visible = track.clientWidth - pad * 2;        // visible area minus both paddings
-  const cardW   = (visible - gap * (cols - 1)) / cols; // exact fit for N cards
-
-  track.querySelectorAll('.ep-card').forEach(card => {
-    card.style.flex = `0 0 ${cardW}px`;
-    card.style.width = `${cardW}px`;
-  });
-}
-
-// ── Navigation ───────────────────────────────────────
-function getStep() {
-  // scroll by exactly 1 card width + gap
-  const card = track.querySelector('.ep-card');
-  if (!card) return 260;
-  return card.offsetWidth + getGap();
-}
-
-function scrollToCard(idx) {
-  const step = getStep();
-  track.scrollTo({ left: step * idx, behavior: 'smooth' });
-}
-
-function getCurrentIndex() {
-  const step = getStep();
-  return Math.round(track.scrollLeft / step);
-}
-
-function updateDots() {
-  const idx = getCurrentIndex();
-  dotsEl.querySelectorAll('.carousel-dot').forEach((d, i) => {
-    d.classList.toggle('active', i === idx);
-  });
-  // disable arrow buttons at edges
-  btnPrev.disabled = idx === 0;
-  btnNext.disabled = idx >= EPISODES.length - getColumns();
-}
-
-track.addEventListener('scroll', updateDots, { passive: true });
-
-btnPrev.addEventListener('click', () => {
-  scrollToCard(Math.max(0, getCurrentIndex() - 1));
-});
-btnNext.addEventListener('click', () => {
-  scrollToCard(Math.min(EPISODES.length - 1, getCurrentIndex() + 1));
-});
-
-// ── Mouse drag (desktop) ─────────────────────────────
-let isDragging = false, dragStartX = 0, dragScrollLeft = 0, didDrag = false;
-
-track.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  didDrag = false;
-  dragStartX = e.pageX - track.getBoundingClientRect().left;
-  dragScrollLeft = track.scrollLeft;
-  track.style.userSelect = 'none';
-  track.style.cursor = 'grabbing';
-});
-track.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-  const x = e.pageX - track.getBoundingClientRect().left;
-  const delta = x - dragStartX;
-  if (Math.abs(delta) > 4) didDrag = true;
-  track.scrollLeft = dragScrollLeft - delta;
-});
-['mouseup','mouseleave'].forEach(evt => {
-  track.addEventListener(evt, () => {
-    isDragging = false;
-    track.style.userSelect = '';
-    track.style.cursor = 'grab';
-  });
-});
-// Prevent click after drag
-track.addEventListener('click', (e) => {
-  if (didDrag) { e.stopPropagation(); e.preventDefault(); didDrag = false; }
-}, true);
-
-// ── Touch swipe (mobile) ─────────────────────────────
-// Native scroll-snap handles momentum; we just snap to nearest card on touchend
-let touchStartX = 0;
-track.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-}, { passive: true });
-
-track.addEventListener('touchend', (e) => {
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  const step = getStep();
-  const idx  = getCurrentIndex();
-  if (Math.abs(dx) > step * 0.2) { // threshold: 20% of card width
-    const target = dx < 0
-      ? Math.min(EPISODES.length - 1, idx + 1)
-      : Math.max(0, idx - 1);
-    scrollToCard(target);
-  } else {
-    scrollToCard(idx); // snap back to current
+      <div class="tl-card ${dead ? 'card-dead' : ''}">
+        <div class="tl-thumb">
+          <img src="https://img.youtube.com/vi/${ep.ytId}/hqdefault.jpg"
+               alt="EP ${ep.ep} — ${ep.title}" loading="lazy"
+               onerror="this.style.opacity='.25'">
+          <div class="tl-thumb-overlay"></div>
+          <div class="tl-thumb-play">
+            <div class="tl-thumb-play-circle">
+              <i class="fa-solid fa-play" style="margin-left:3px"></i>
+            </div>
+          </div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-ep-num">EPISODIO ${ep.ep}</div>
+          <div class="tl-title">${ep.title}</div>
+          <div class="tl-meta">
+            <span class="tl-deaths ${dead ? 'has-deaths' : ''}">
+              <i class="fa-solid fa-skull"></i>
+              ${ep.deaths} MUERTE${ep.deaths !== 1 ? 'S' : ''}
+            </span>
+            <span class="tl-dur">
+              <i class="fa-regular fa-clock"></i> ${ep.duration}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+    item.querySelector('.tl-card').addEventListener('click', () => openYT(ep.ytId));
+    return item;
   }
-}, { passive: true });
 
-// ── Resize handler ───────────────────────────────────
-let resizeTimer;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    setCardWidths();
-    updateDots();
-    // re-snap to current card after resize
-    scrollToCard(getCurrentIndex());
-  }, 120);
-});
+  // ── Render feed ───────────────────────────────────
+  function renderFeed() {
+    feed.innerHTML = '';
+    const ordered = descending ? [...EPS].reverse() : [...EPS];
+    ordered.forEach(ep => feed.appendChild(buildItem(ep)));
+    // alignNodes is called via rAF after paint, not here
+  }
 
-// ── Init ─────────────────────────────────────────────
-setCardWidths();
-updateDots();
-*/
+  // ── Node centering ────────────────────────────────
+  // .tl-node stretches full card height; .tl-node-dot is absolute inside it.
+  // We set dot's `top` = thumbH/2 - dotRadius so it visually sits on thumb center.
+  // thumb aspect-ratio is 16:9 → thumbH = thumbWidth * 9/16 (always reliable).
+  function alignNodes() {
+    feed.querySelectorAll('.tl-item').forEach(item => {
+      const thumb = item.querySelector('.tl-thumb');
+      const dot   = item.querySelector('.tl-node-dot');
+      if (!thumb || !dot) return;
+      const thumbH    = thumb.offsetWidth * 9 / 16;
+      const dotRadius = 14; // half of 28px
+      dot.style.top = Math.max(0, thumbH / 2 - dotRadius) + 'px';
+    });
+  }
+
+  // Run after first paint and on every resize
+  requestAnimationFrame(() => requestAnimationFrame(alignNodes));
+  let raf;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(alignNodes);
+  });
+
+  // ── Sort button ───────────────────────────────────
+  sortBtn.addEventListener('click', () => {
+    descending = !descending;
+    if (descending) {
+      sortIcon.className  = 'fa-solid fa-arrow-down-1-9';
+      sortLabel.textContent = 'MÁS RECIENTE';
+      sortBtn.classList.remove('desc');
+    } else {
+      sortIcon.className  = 'fa-solid fa-arrow-up-1-9';
+      sortLabel.textContent = 'MÁS ANTIGUO';
+      sortBtn.classList.add('desc');
+    }
+    // fade out → swap → fade in
+    feed.style.transition = 'opacity .2s';
+    feed.style.opacity = '0';
+    setTimeout(() => {
+      renderFeed();
+      feed.style.opacity = '1';
+      requestAnimationFrame(() => requestAnimationFrame(alignNodes));
+    }, 200);
+  });
+
+  renderFeed();
+})();
 /* ══════════════════════════════════════════════════════
    INJECT FA ICON INTO CRITICAL RULES
 ══════════════════════════════════════════════════════ */
@@ -1978,6 +2216,41 @@ function randomGlitch() {
 setInterval(randomGlitch, 3500 + Math.random() * 4000);
 
 
+
+/* ══════════════════════════════════════════════════════
+   STICKY TRAILER BUTTON — MODAL
+══════════════════════════════════════════════════════ */
+(function () {
+  const btn      = document.getElementById('trailer-btn');
+  const modal    = document.getElementById('trailer-modal');
+  const backdrop = document.getElementById('trailerBackdrop');
+  const closeBtn = document.getElementById('trailerClose');
+  const iframe   = document.getElementById('trailerIframe');
+  const SRC      = iframe.dataset.src;
+
+  function openModal() {
+    iframe.src = SRC;                   // load video + autoplay
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    // stop video by clearing src, restore after animation
+    setTimeout(() => { iframe.src = ''; }, 350);
+  }
+
+  btn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', closeModal);
+
+  // ESC key closes modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+})();
 
 /* ══════════════════════════════════════════════════════
    CURSOR TRAIL (desktop only)
