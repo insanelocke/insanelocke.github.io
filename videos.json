@@ -1,12 +1,12 @@
 [
   {
-    "ep": "03",
-    "title": "ADIÓS, COMPAÑERO... 💔 (#3)  Pokémon Zafiro Alfa Insanelocke",
-    "deaths": 1,
-    "duration": "28:33",
+    "ep": "01",
+    "title": "¡COMIENZA LA PESADILLA! (#1) Pokémon Zafiro Alfa Insanelocke",
+    "deaths": 0,
+    "duration": "23:13",
     "fa": "fa-clapperboard",
     "color": "#ff0033",
-    "ytId": "peoSly5dyaE"
+    "ytId": "Th9GO-1KijU"
   },
   {
     "ep": "02",
@@ -17,13 +17,13 @@
     "color": "#ff0033",
     "ytId": "H5tQZ89tN5w"
   },
-  {
-    "ep": "01",
-    "title": "¡COMIENZA LA PESADILLA! (#1) Pokémon Zafiro Alfa Insanelocke",
-    "deaths": 0,
-    "duration": "23:13",
+   {
+    "ep": "03",
+    "title": "ADIÓS, COMPAÑERO... 💔 (#3)  Pokémon Zafiro Alfa Insanelocke",
+    "deaths": 1,
+    "duration": "28:33",
     "fa": "fa-clapperboard",
     "color": "#ff0033",
-    "ytId": "Th9GO-1KijU"
+    "ytId": "peoSly5dyaE"
   }
 ]
