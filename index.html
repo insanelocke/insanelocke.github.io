@@ -922,16 +922,140 @@ nav {
   transform: scale(1.06);
 }
 .life-item.dead {
-  border-color: rgba(255,255,255,.04);
-  background: rgba(0,0,0,.25);
+  border-color: rgba(255,255,255,.06);
+  background: rgba(0,0,0,.35);
+  cursor: default;
+  overflow: visible;
+  text-decoration: none; /* por si el elemento es <a> */
+  color: inherit;
 }
-.life-item.dead::after {
+/* cuando toda la celda es enlace */
+a.life-item.dead {
+  cursor: pointer;
+}
+a.life-item.dead:hover {
+  border-color: rgba(155,0,255,.45);
+  box-shadow: 0 0 20px rgba(155,0,255,.2);
+}
+/* Estado oscurecido del icono muerto */
+.life-item.dead .life-emoji {
+  opacity: 0.18;
+  filter: grayscale(1) brightness(0.5);
+  transition: opacity .2s, filter .2s;
+}
+.life-item.dead .life-num {
+  opacity: 0.18;
+  transition: opacity .2s;
+}
+
+/* ── POPOVER flotante ─────────────────────────────── */
+.life-item.dead .dead-pokemon-link {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 8px 10px;
+  background: rgba(8, 0, 18, 0.93);
+  border: 1px solid rgba(155,0,255,.55);
+  box-shadow: 0 0 18px rgba(155,0,255,.35), 0 0 40px rgba(155,0,255,.12), 0 8px 32px rgba(0,0,0,.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+  text-decoration: none;
+  z-index: 100;
+}
+/* flecha apuntando a la celda */
+.life-item.dead .dead-pokemon-link::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(155,0,255,.55);
+  pointer-events: none;
+}
+/* etiqueta superior */
+.life-item.dead .dead-pokemon-link::before {
+  content: '✦ CAÍDO ✦';
+  position: absolute;
+  top: 6px;
+  left: 0; right: 0;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: .44rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(200,120,255,.85);
+  text-shadow: 0 0 8px rgba(155,0,255,.6);
+}
+.life-item.dead:hover .life-emoji,
+.life-item.dead:hover .life-num {
+  opacity: 0;
+}
+/* calavera en el hueco oscuro al hacer hover (sólo celdas con datos de Pokémon) */
+a.life-item.dead:hover::after,
+.life-item.dead:not(.no-data):hover::after {
+  content: '\2620';
+  position: absolute;
+  inset: 0;
+  font-size: clamp(1rem, 2.8vw, 1.6rem);
+  color: rgba(155,0,255,.3);
+  text-shadow: 0 0 12px rgba(155,0,255,.4);
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.life-item.dead:hover .dead-pokemon-link {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.life-item.dead .dead-pokemon-link img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 8px rgba(155,0,255,.8)) drop-shadow(0 0 16px rgba(155,0,255,.4));
+  transition: transform .2s;
+}
+.life-item.dead:hover .dead-pokemon-link img {
+  transform: scale(1.08) translateY(-2px);
+}
+.life-item.dead .dead-pokemon-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: .52rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #d580ff;
+  text-shadow: 0 0 10px rgba(155,0,255,.8), 0 0 20px rgba(155,0,255,.4);
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+/* Sin link: X suave */
+.life-item.dead.no-data::after {
   content: '\00D7';
   position: absolute;
-  color: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.1);
   font-size: clamp(1rem, 3vw, 2rem);
   font-weight: 100;
 }
+/* evitar corte por overflow en secciones padre */
+#lives-section { overflow: visible; }
+.lives-grid { overflow: visible; }
 .life-emoji { font-size: clamp(.8rem, 2.5vw, 1.6rem); position: relative; z-index: 1; }
 .life-num {
   font-family: 'Orbitron', sans-serif;
@@ -1572,25 +1696,18 @@ section, footer, nav { max-width: 100vw; }
     <div class="section-label reveal">ÚLTIMO EPISODIO</div>
     <h2 class="section-title reveal">EL <span style="color:var(--red)">CAOS</span><br>EMPIEZA AQUÍ</h2>
 
-    <div class="video-container reveal">
-      <!--
-        ════════════════════════════════════
-        CÓMO ACTUALIZAR EL ÚLTIMO EPISODIO
-        ════════════════════════════════════
-        Cambia el ID del vídeo en la URL del iframe:
-        https://www.youtube.com/embed/TU_VIDEO_ID
-        Actualiza también el ep-badge y el ep-title.
-      -->
+    <div class="video-container reveal" id="featuredVideoContainer">
       <iframe
-        src="https://www.youtube.com/embed/H5tQZ89tN5w"
-        title="INSANELOCKE EP01"
+        id="featuredIframe"
+        src=""
+        title="INSANELOCKE — Último Episodio"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
       ></iframe>
       <div class="video-overlay"></div>
       <div class="video-info">
-        <div class="ep-badge">EP 02</div>
-        <div class="ep-title">EL SUSTO DE MI VIDA 😰 (#2) Pokémon Zafiro Alfa Insanelocke</div>
+        <div class="ep-badge" id="featuredEpBadge">EP --</div>
+        <div class="ep-title" id="featuredEpTitle">Cargando...</div>
       </div>
     </div>
   </div>
@@ -2024,50 +2141,136 @@ for (let i = 0; i < 20; i++) {
 
 /* ══════════════════════════════════════════════════════
    LIVES GRID
+   ══════════════════════════════════════════════════════
+   Para marcar una vida como perdida, añade en DEATHS_DATA
+   un objeto con los siguientes campos:
+   {
+     life:    1,              // número de vida perdida (1-20)
+     pokemon: "charizard",   // nombre en inglés (minúsculas) para el sprite
+     label:   "Charizard",   // nombre a mostrar en el tooltip
+     ytId:    "ID_YOUTUBE",  // ID del vídeo donde murió
+     time:    3742           // timestamp en segundos (ej: 3742 = 1h2m22s)
+   }
 ══════════════════════════════════════════════════════ */
+const DEATHS_DATA = [
+  // Ejemplo de cómo añadir muertes — descomenta y edita:
+  // { life: 1, pokemon: "charizard", label: "Charizard", ytId: "H5tQZ89tN5w", time: 1234 },
+  // { life: 2, pokemon: "blastoise", label: "Blastoise",  ytId: "H5tQZ89tN5w", time: 2100 },
+];
+
+// Sprites de Pokémon Showdown
+function getShowdownSprite(pokemonName) {
+  const name = pokemonName.toLowerCase().replace(/[^a-z0-9-]/g, '');
+  return `https://play.pokemonshowdown.com/sprites/gen5/${name}.png`;
+}
+
+// Construir mapa life# → datos de muerte
+const deathMap = {};
+DEATHS_DATA.forEach(d => { deathMap[d.life] = d; });
+
 const livesGrid = document.getElementById('livesGrid');
+
 for (let i = 1; i <= 20; i++) {
   const div = document.createElement('div');
-  div.className = 'life-item ' + (i <= LIVES_ALIVE ? 'alive' : 'dead');
-  const icon = i <= LIVES_ALIVE
-    ? '<i class="fa-solid fa-heart"></i>'
-    : '<i class="fa-solid fa-skull"></i>';
-  div.innerHTML = `<span class="life-emoji">${icon}</span><span class="life-num">#${String(i).padStart(2,'0')}</span>`;
+  const death = deathMap[i];
+  const isDead = i > LIVES_ALIVE || !!death;
+
+  if (!isDead) {
+    // Vida activa
+    div.className = 'life-item alive';
+    div.innerHTML = `
+      <span class="life-emoji"><i class="fa-solid fa-heart"></i></span>
+      <span class="life-num">#${String(i).padStart(2,'0')}</span>
+    `;
+  } else if (death) {
+    // Vida perdida CON datos de Pokémon — toda la celda es enlace
+    const ytUrl = `https://www.youtube.com/watch?v=${death.ytId}&t=${death.time}s`;
+    // Convertimos el div en <a> para que toda la celda sea clickable
+    const link = document.createElement('a');
+    link.href = ytUrl;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.className = 'life-item dead';
+    link.title = `${death.label} — ver momento`;
+    link.innerHTML = `
+      <span class="life-emoji"><i class="fa-solid fa-skull"></i></span>
+      <span class="life-num">#${String(i).padStart(2,'0')}</span>
+      <span class="dead-pokemon-link">
+        <img
+          src="${getShowdownSprite(death.pokemon)}"
+          alt="${death.label}"
+          loading="lazy"
+          onerror="this.src='https://play.pokemonshowdown.com/sprites/gen5/substitute.png'"
+        >
+        <span class="dead-pokemon-name">${death.label}</span>
+      </span>
+    `;
+    livesGrid.appendChild(link);
+    continue;
+  } else {
+    // Vida perdida SIN datos (slot vacío oscuro)
+    div.className = 'life-item dead no-data';
+    div.innerHTML = `
+      <span class="life-emoji"><i class="fa-solid fa-skull"></i></span>
+      <span class="life-num">#${String(i).padStart(2,'0')}</span>
+    `;
+  }
+
   livesGrid.appendChild(div);
 }
 
 /* ══════════════════════════════════════════════════════
-   EPISODES TIMELINE — datos desde videos.json
+   CARGA ÚNICA DE videos.json
+   Compartida por Featured Video y Episodes Timeline
 ══════════════════════════════════════════════════════ */
-(async function initEpisodesGrid() {
-  const feed    = document.getElementById('tlFeed');
-  const empty   = document.getElementById('epsEmpty');
-  const totalEl = document.getElementById('epsTotal');
-  const sortBtn  = document.getElementById('tlSortBtn');
-  const sortIcon = document.getElementById('tlSortIcon');
-  const sortLabel= document.getElementById('tlSortLabel');
+(async function initFromVideosJSON() {
 
-  const FALLBACK = window.__VIDEOS_JSON__ || [
-    { ep:'00', title:'¡El Caos Absoluto Ha Llegado!', deaths:0, duration:'02:15', ytId:'cT12CuoTWQo' }
-  ];
-
-  let EPS = [];
+  // ── Carga con anticarché ──────────────────────────
+  let videos = [];
   try {
-    const res = await fetch('videos.json');
+    const res = await fetch('videos.json?v=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    EPS = await res.json();
-  } catch (_) { EPS = FALLBACK; }
+    videos = await res.json();
+    console.log('[INSANELOCKE] videos.json OK —', videos.length, 'episodios:', videos.map(v => 'EP' + v.ep));
+  } catch (err) {
+    console.error('[INSANELOCKE] No se pudo cargar videos.json:', err.message);
+    videos = [];
+  }
 
-  if (!EPS.length) { empty.style.display = 'block'; return; }
+  if (!videos.length) {
+    console.warn('[INSANELOCKE] Array vacío — comprueba que videos.json existe y es válido');
+    document.getElementById('epsEmpty').style.display = 'block';
+    return;
+  }
 
+  // ══════════════════════════════════════════════════
+  // FEATURED VIDEO — último elemento del array
+  // ══════════════════════════════════════════════════
+  const last   = videos[videos.length - 1];
+  const iframe = document.getElementById('featuredIframe');
+  const badge  = document.getElementById('featuredEpBadge');
+  const title  = document.getElementById('featuredEpTitle');
+
+  iframe.src         = 'https://www.youtube.com/embed/' + last.ytId;
+  badge.textContent  = 'EP ' + last.ep;
+  title.textContent  = last.title;
+
+  // ══════════════════════════════════════════════════
+  // EPISODES TIMELINE
+  // ══════════════════════════════════════════════════
+  const feed      = document.getElementById('tlFeed');
+  const totalEl   = document.getElementById('epsTotal');
+  const sortBtn   = document.getElementById('tlSortBtn');
+  const sortIcon  = document.getElementById('tlSortIcon');
+  const sortLabel = document.getElementById('tlSortLabel');
+
+  let EPS = videos;
   totalEl.textContent = EPS.length;
 
   const openYT = (ytId) => window.open('https://www.youtube.com/watch?v=' + ytId, '_blank', 'noopener');
 
-  // ── Sort state: true = reciente primero (desc), false = antiguo primero (asc)
   let descending = true;
 
-  // ── Build a single timeline item ─────────────────
   function buildItem(ep) {
     const dead = ep.deaths > 0;
     const item = document.createElement('div');
@@ -2110,30 +2313,23 @@ for (let i = 1; i <= 20; i++) {
     return item;
   }
 
-  // ── Render feed ───────────────────────────────────
-  function renderFeed() {
-    feed.innerHTML = '';
-    const ordered = descending ? [...EPS].reverse() : [...EPS];
-    ordered.forEach(ep => feed.appendChild(buildItem(ep)));
-    // alignNodes is called via rAF after paint, not here
-  }
-
-  // ── Node centering ────────────────────────────────
-  // .tl-node stretches full card height; .tl-node-dot is absolute inside it.
-  // We set dot's `top` = thumbH/2 - dotRadius so it visually sits on thumb center.
-  // thumb aspect-ratio is 16:9 → thumbH = thumbWidth * 9/16 (always reliable).
   function alignNodes() {
     feed.querySelectorAll('.tl-item').forEach(item => {
       const thumb = item.querySelector('.tl-thumb');
       const dot   = item.querySelector('.tl-node-dot');
       if (!thumb || !dot) return;
       const thumbH    = thumb.offsetWidth * 9 / 16;
-      const dotRadius = 14; // half of 28px
+      const dotRadius = 14;
       dot.style.top = Math.max(0, thumbH / 2 - dotRadius) + 'px';
     });
   }
 
-  // Run after first paint and on every resize
+  function renderFeed() {
+    feed.innerHTML = '';
+    const ordered = descending ? [...EPS].reverse() : [...EPS];
+    ordered.forEach(ep => feed.appendChild(buildItem(ep)));
+  }
+
   requestAnimationFrame(() => requestAnimationFrame(alignNodes));
   let raf;
   window.addEventListener('resize', () => {
@@ -2141,21 +2337,19 @@ for (let i = 1; i <= 20; i++) {
     raf = requestAnimationFrame(alignNodes);
   });
 
-  // ── Sort button ───────────────────────────────────
   sortBtn.addEventListener('click', () => {
     descending = !descending;
     if (descending) {
-      sortIcon.className  = 'fa-solid fa-arrow-down-1-9';
+      sortIcon.className    = 'fa-solid fa-arrow-down-1-9';
       sortLabel.textContent = 'MÁS RECIENTE';
       sortBtn.classList.remove('desc');
     } else {
-      sortIcon.className  = 'fa-solid fa-arrow-up-1-9';
+      sortIcon.className    = 'fa-solid fa-arrow-up-1-9';
       sortLabel.textContent = 'MÁS ANTIGUO';
       sortBtn.classList.add('desc');
     }
-    // fade out → swap → fade in
     feed.style.transition = 'opacity .2s';
-    feed.style.opacity = '0';
+    feed.style.opacity    = '0';
     setTimeout(() => {
       renderFeed();
       feed.style.opacity = '1';
