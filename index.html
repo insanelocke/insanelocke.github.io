@@ -2123,40 +2123,8 @@ document.addEventListener('click', (e) => {
 
 
 /* ══════════════════════════════════════════════════════
-   HERO LIVES BAR
+   LIVES — carga desde deaths.json
 ══════════════════════════════════════════════════════ */
-const LIVES_ALIVE = 20;
-const heroLivesBar = document.getElementById('heroLivesBar');
-for (let i = 0; i < 20; i++) {
-  const span = document.createElement('span');
-  if (i < LIVES_ALIVE) {
-    span.className = 'life-heart';
-    span.innerHTML = '<i class="fa-solid fa-heart"></i>';
-  } else {
-    span.className = 'life-dead';
-    span.innerHTML = '<i class="fa-solid fa-heart-crack"></i>';
-  }
-  heroLivesBar.appendChild(span);
-}
-
-/* ══════════════════════════════════════════════════════
-   LIVES GRID
-   ══════════════════════════════════════════════════════
-   Para marcar una vida como perdida, añade en DEATHS_DATA
-   un objeto con los siguientes campos:
-   {
-     life:    1,              // número de vida perdida (1-20)
-     pokemon: "charizard",   // nombre en inglés (minúsculas) para el sprite
-     label:   "Charizard",   // nombre a mostrar en el tooltip
-     ytId:    "ID_YOUTUBE",  // ID del vídeo donde murió
-     time:    3742           // timestamp en segundos (ej: 3742 = 1h2m22s)
-   }
-══════════════════════════════════════════════════════ */
-const DEATHS_DATA = [
-  // Ejemplo de cómo añadir muertes — descomenta y edita:
-  // { life: 1, pokemon: "charizard", label: "Charizard", ytId: "H5tQZ89tN5w", time: 1234 },
-  // { life: 2, pokemon: "blastoise", label: "Blastoise",  ytId: "H5tQZ89tN5w", time: 2100 },
-];
 
 // Sprites de Pokémon Showdown
 function getShowdownSprite(pokemonName) {
@@ -2164,60 +2132,101 @@ function getShowdownSprite(pokemonName) {
   return `https://play.pokemonshowdown.com/sprites/gen5/${name}.png`;
 }
 
-// Construir mapa life# → datos de muerte
-const deathMap = {};
-DEATHS_DATA.forEach(d => { deathMap[d.life] = d; });
+function renderLives(DEATHS_DATA) {
+  const TOTAL_LIVES = 20;
+  const deathMap = {};
+  DEATHS_DATA.forEach(d => { deathMap[d.life] = d; });
 
-const livesGrid = document.getElementById('livesGrid');
+  const livesLost = DEATHS_DATA.length;
+  const livesAlive = Math.max(0, TOTAL_LIVES - livesLost);
 
-for (let i = 1; i <= 20; i++) {
-  const div = document.createElement('div');
-  const death = deathMap[i];
-  const isDead = i > LIVES_ALIVE || !!death;
-
-  if (!isDead) {
-    // Vida activa
-    div.className = 'life-item alive';
-    div.innerHTML = `
-      <span class="life-emoji"><i class="fa-solid fa-heart"></i></span>
-      <span class="life-num">#${String(i).padStart(2,'0')}</span>
-    `;
-  } else if (death) {
-    // Vida perdida CON datos de Pokémon — toda la celda es enlace
-    const ytUrl = `https://www.youtube.com/watch?v=${death.ytId}&t=${death.time}s`;
-    // Convertimos el div en <a> para que toda la celda sea clickable
-    const link = document.createElement('a');
-    link.href = ytUrl;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.className = 'life-item dead';
-    link.title = `${death.label} — ver momento`;
-    link.innerHTML = `
-      <span class="life-emoji"><i class="fa-solid fa-skull"></i></span>
-      <span class="life-num">#${String(i).padStart(2,'0')}</span>
-      <span class="dead-pokemon-link">
-        <img
-          src="${getShowdownSprite(death.pokemon)}"
-          alt="${death.label}"
-          loading="lazy"
-          onerror="this.src='https://play.pokemonshowdown.com/sprites/gen5/substitute.png'"
-        >
-        <span class="dead-pokemon-name">${death.label}</span>
-      </span>
-    `;
-    livesGrid.appendChild(link);
-    continue;
-  } else {
-    // Vida perdida SIN datos (slot vacío oscuro)
-    div.className = 'life-item dead no-data';
-    div.innerHTML = `
-      <span class="life-emoji"><i class="fa-solid fa-skull"></i></span>
-      <span class="life-num">#${String(i).padStart(2,'0')}</span>
-    `;
+  // ── Hero lives bar ──────────────────────────────
+  const heroLivesBar = document.getElementById('heroLivesBar');
+  heroLivesBar.innerHTML = '';
+  for (let i = 0; i < TOTAL_LIVES; i++) {
+    const span = document.createElement('span');
+    if (i < livesAlive) {
+      span.className = 'life-heart';
+      span.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    } else {
+      span.className = 'life-dead';
+      span.innerHTML = '<i class="fa-solid fa-heart-crack"></i>';
+    }
+    heroLivesBar.appendChild(span);
   }
 
-  livesGrid.appendChild(div);
+  // ── Section title ────────────────────────────────
+  const livesTitle = document.querySelector('#lives-section .section-title');
+  if (livesTitle) {
+    livesTitle.innerHTML = `QUEDAN <span style="color:var(--red)">${livesAlive} VIDA${livesAlive !== 1 ? 'S' : ''}</span>`;
+  }
+
+  // ── Lives grid ───────────────────────────────────
+  const livesGrid = document.getElementById('livesGrid');
+  livesGrid.innerHTML = '';
+
+  for (let i = 1; i <= TOTAL_LIVES; i++) {
+    const death = deathMap[i];
+    const isDead = !!death || (i > livesAlive && !death && i <= TOTAL_LIVES);
+
+    if (!isDead) {
+      const div = document.createElement('div');
+      div.className = 'life-item alive';
+      div.innerHTML = `
+        <span class="life-emoji"><i class="fa-solid fa-heart"></i></span>
+        <span class="life-num">#${String(i).padStart(2,'0')}</span>
+      `;
+      livesGrid.appendChild(div);
+    } else if (death) {
+      // Vida perdida CON datos de Pokémon — toda la celda es enlace
+      const ytUrl = `https://www.youtube.com/watch?v=${death.ytId}&t=${death.time}s`;
+      const link = document.createElement('a');
+      link.href = ytUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.className = 'life-item dead';
+      link.title = `${death.label} — ver momento`;
+      link.innerHTML = `
+        <span class="life-emoji"><i class="fa-solid fa-skull"></i></span>
+        <span class="life-num">#${String(i).padStart(2,'0')}</span>
+        <span class="dead-pokemon-link">
+          <img
+            src="${getShowdownSprite(death.pokemon)}"
+            alt="${death.label}"
+            loading="lazy"
+            onerror="this.src='https://play.pokemonshowdown.com/sprites/gen5/substitute.png'"
+          >
+          <span class="dead-pokemon-name">${death.label}</span>
+        </span>
+      `;
+      livesGrid.appendChild(link);
+    } else {
+      // Vida perdida SIN datos (slot vacío oscuro)
+      const div = document.createElement('div');
+      div.className = 'life-item dead no-data';
+      div.innerHTML = `
+        <span class="life-emoji"><i class="fa-solid fa-skull"></i></span>
+        <span class="life-num">#${String(i).padStart(2,'0')}</span>
+      `;
+      livesGrid.appendChild(div);
+    }
+  }
 }
+
+// Carga deaths.json con anticarché y renderiza
+(async function initLives() {
+  let deaths = [];
+  try {
+    const res = await fetch('deaths.json?v=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    deaths = await res.json();
+    console.log('[INSANELOCKE] deaths.json OK —', deaths.length, 'muertes cargadas');
+  } catch (err) {
+    console.warn('[INSANELOCKE] No se pudo cargar deaths.json, mostrando todas las vidas activas:', err.message);
+    deaths = [];
+  }
+  renderLives(deaths);
+})();
 
 /* ══════════════════════════════════════════════════════
    CARGA ÚNICA DE videos.json
