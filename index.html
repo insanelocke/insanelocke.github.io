@@ -2253,9 +2253,9 @@ function renderLives(DEATHS_DATA) {
   }
 
   // ══════════════════════════════════════════════════
-  // FEATURED VIDEO — último elemento del array
+  // FEATURED VIDEO — primer elemento del array (más reciente)
   // ══════════════════════════════════════════════════
-  const last   = videos[videos.length - 1];
+  const last   = videos[0];
   const iframe = document.getElementById('featuredIframe');
   const badge  = document.getElementById('featuredEpBadge');
   const title  = document.getElementById('featuredEpTitle');
@@ -2335,7 +2335,10 @@ function renderLives(DEATHS_DATA) {
 
   function renderFeed() {
     feed.innerHTML = '';
-    const ordered = descending ? [...EPS].reverse() : [...EPS];
+    // videos.json ya viene ordenado de más reciente a más antiguo (EP04→EP01)
+    // descending = true  → orden natural del array (más reciente primero)
+    // descending = false → orden inverso (más antiguo primero)
+    const ordered = descending ? [...EPS] : [...EPS].reverse();
     ordered.forEach(ep => feed.appendChild(buildItem(ep)));
   }
 
